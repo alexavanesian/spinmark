@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spinmark — Track Your Album &amp; Single Ratings</title>
+<meta name="description" content="Rate and keep a running record of every album and single you listen to. A fast, simple music rating log with star ratings, cover art, and notes.">
+<meta name="robots" content="index, follow">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spinmark — Track Your Album & Single Ratings">
+<meta property="og:description" content="Rate and keep a running record of every album and single you listen to.">
+<meta name="twitter:card" content="summary">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script type="application/ld+json" id="structuredData">{}</script>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#e9ece3; --surface:#fbfaf5; --ink:#20241f; --ink-soft:#5b6156;
+  --accent:#8c3a2e; --gold:#a5791c; --border:#d5d9c9; --star-empty:#c9cdbc;
+  --font-display:'Fraunces',Georgia,serif; --font-body:'Work Sans',-apple-system,BlinkMacSystemFont,sans-serif;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#171b16; --surface:#1f241d; --ink:#ece8dd; --ink-soft:#a3a89a;
+    --accent:#d97a63; --gold:#d9b04c; --border:#333a2e; --star-empty:#454c3d;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#171b16; --surface:#1f241d; --ink:#ece8dd; --ink-soft:#a3a89a;
+  --accent:#d97a63; --gold:#d9b04c; --border:#333a2e; --star-empty:#454c3d;
+}
+*,*::before,*::after{box-sizing:inherit;}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);line-height:1.5;}
+.page{max-width:640px;margin:0 auto;padding:2.5rem 1.25rem 3rem;}
+h1,h2{font-family:var(--font-display);font-weight:600;margin:0;}
+.site-header{margin-bottom:2rem;}
+.site-header h1{font-size:2.1rem;color:var(--ink);}
+.site-header .tagline{margin:.5rem 0 0;color:var(--ink-soft);max-width:34ch;}
+.site-nav{display:flex;gap:1.25rem;margin:.9rem 0 0;}
+.site-nav a{font-size:.9rem;color:var(--ink-soft);text-decoration:none;padding-bottom:.25rem;border-bottom:2px solid transparent;}
+.site-nav a.active{color:var(--ink);border-bottom-color:var(--accent);}
+.site-nav a:hover{color:var(--ink);}
+.page-section[hidden]{display:none;}
+.stats{display:flex;gap:1.75rem;flex-wrap:wrap;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 0;margin-bottom:2rem;}
+.stats div{display:flex;flex-direction:column;}
+.stat-num{font-family:var(--font-display);font-size:1.5rem;font-weight:600;}
+.stat-label{font-size:.8rem;color:var(--ink-soft);}
+.home-block{margin-bottom:2rem;}
+.home-block h2{font-size:1.1rem;margin-bottom:.85rem;}
+.mini-grid{display:flex;gap:1rem;flex-wrap:wrap;}
+.mini-card{width:128px;}
+.mini-card .cover{width:128px;height:128px;border-radius:8px;object-fit:cover;display:block;background:var(--surface);}
+.mini-card .cover.placeholder{display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--gold);border:1px solid var(--border);}
+.mini-card h3{font-family:var(--font-display);font-size:.9rem;margin:.4rem 0 0;font-weight:600;}
+.mini-card p{font-size:.78rem;color:var(--ink-soft);margin:.1rem 0 0;}
+.stars.small{font-size:.8rem;}
+.empty-inline{color:var(--ink-soft);font-size:.85rem;}
+#addForm{display:flex;flex-direction:column;gap:.9rem;max-width:420px;}
+.field-row{display:flex;gap:.9rem;flex-wrap:wrap;}
+.field-row label,#addForm>label,.cover-field{display:flex;flex-direction:column;gap:.3rem;font-size:.85rem;color:var(--ink-soft);flex:1;min-width:140px;}
+input[type=text],input[type=number],textarea,input[type=file]{font-family:var(--font-body);font-size:1rem;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.5rem .6rem;}
+input[type=file]{padding:.4rem;}
+textarea{resize:vertical;}
+.year-field{max-width:110px;flex:0 0 auto;}
+fieldset.type-choice{border:none;padding:0;margin:0;display:flex;align-items:center;gap:1rem;}
+fieldset.type-choice legend{font-size:.85rem;color:var(--ink-soft);padding:0 0 .3rem;}
+fieldset.type-choice label{flex-direction:row;align-items:center;gap:.35rem;font-size:.95rem;color:var(--ink);}
+.rating-field{display:flex;align-items:center;gap:.75rem;}
+.rating-field>span{font-size:.85rem;color:var(--ink-soft);}
+.star-input{display:flex;flex-direction:row-reverse;justify-content:flex-end;}
+.star-input input{position:absolute;opacity:0;width:1px;height:1px;}
+.star-input label{font-size:1.7rem;line-height:1;color:var(--star-empty);cursor:pointer;padding:0 .1rem;}
+.star-input input:checked~label,.star-input label:hover,.star-input label:hover~label{color:var(--gold);}
+#coverPreview{width:72px;height:72px;object-fit:cover;border-radius:8px;margin-top:.3rem;}
+.mb-search{margin-bottom:1.25rem;max-width:420px;position:relative;}
+.mb-search label{display:flex;flex-direction:column;gap:.3rem;font-size:.85rem;color:var(--ink-soft);}
+.mb-hint{font-size:.78rem;color:var(--ink-soft);margin:.3rem 0 0;}
+.mb-results{list-style:none;margin:.5rem 0 0;padding:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--surface);}
+.mb-results li{padding:.55rem .7rem;cursor:pointer;font-size:.9rem;border-bottom:1px solid var(--border);}
+.mb-results li:last-child{border-bottom:none;}
+.mb-results li:hover{background:var(--bg);}
+.mb-results li .mbr-artist{color:var(--ink-soft);font-size:.82rem;}
+button[type=submit]{align-self:flex-start;font-family:var(--font-body);font-weight:600;font-size:.95rem;color:#fff;background:var(--accent);border:none;border-radius:6px;padding:.6rem 1.2rem;cursor:pointer;}
+button[type=submit]:hover{opacity:.9;}
+.list-controls{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;}
+#searchInput{flex:1;min-width:160px;font-family:var(--font-body);font-size:.95rem;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.45rem .6rem;}
+.type-filter{display:flex;gap:.4rem;}
+.filter-btn{font-family:var(--font-body);font-size:.85rem;color:var(--ink-soft);background:transparent;border:1px solid var(--border);border-radius:6px;padding:.4rem .7rem;cursor:pointer;}
+.filter-btn.active{background:var(--ink);color:var(--bg);border-color:var(--ink);}
+#sortSelect{font-family:var(--font-body);font-size:.85rem;color:var(--ink);background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.45rem .5rem;}
+.entries{display:flex;flex-direction:column;}
+.entry{display:flex;gap:.85rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid var(--border);animation:rise .25s ease both;}
+@keyframes rise{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.rank{font-family:var(--font-display);font-size:1.4rem;color:var(--ink-soft);width:2ch;flex:0 0 auto;}
+.cover{width:48px;height:48px;border-radius:6px;object-fit:cover;flex:0 0 auto;background:var(--surface);}
+.cover.placeholder{display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1.2rem;border:1px solid var(--border);}
+.entry-body{flex:1;min-width:0;}
+.entry-head{display:flex;align-items:baseline;gap:.5rem;flex-wrap:wrap;}
+.entry-head h3{font-family:var(--font-display);font-weight:600;font-size:1.1rem;margin:0;}
+.badge{font-size:.72rem;color:var(--ink-soft);border:1px solid var(--border);border-radius:99px;padding:.05rem .55rem;}
+.artist-line{color:var(--ink-soft);font-size:.9rem;margin:.15rem 0 .4rem;}
+.stars{color:var(--gold);letter-spacing:.1em;}
+.note{margin:.4rem 0 0;font-size:.9rem;color:var(--ink-soft);}
+.delete-btn{background:none;border:none;color:var(--ink-soft);font-size:1.1rem;cursor:pointer;padding:.2rem .3rem;flex:0 0 auto;}
+.delete-btn:hover{color:var(--accent);}
+.empty-state{color:var(--ink-soft);padding:1.5rem 0;}
+.site-footer{margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border);}
+.site-footer p{font-size:.8rem;color:var(--ink-soft);}
+@media(max-width:420px){.site-header h1{font-size:1.8rem;}}
+</style>
+</head>
+<body>
+<div class="page">
+
+<header class="site-header">
+  <h1>Spinmark</h1>
+  <nav class="site-nav" aria-label="Main">
+    <a href="#home" data-page="home">Home</a>
+    <a href="#browse" data-page="browse">Browse</a>
+    <a href="#add" data-page="add">Add</a>
+  </nav>
+  <p class="tagline">Keep score of every album and single you hear.</p>
+</header>
+
+<main>
+
+<section class="page-section" data-page="home" id="page-home">
+  <div class="stats" aria-label="Collection stats">
+    <div><span class="stat-num" id="statTotal">0</span><span class="stat-label">rated</span></div>
+    <div><span class="stat-num" id="statAlbums">0</span><span class="stat-label">albums</span></div>
+    <div><span class="stat-num" id="statSingles">0</span><span class="stat-label">singles</span></div>
+    <div><span class="stat-num" id="statAvg">–</span><span class="stat-label">average</span></div>
+  </div>
+  <div class="home-block">
+    <h2>Recently added</h2>
+    <div class="mini-grid" id="recentGrid"></div>
+  </div>
+  <div class="home-block">
+    <h2>Top rated</h2>
+    <div class="mini-grid" id="topGrid"></div>
+  </div>
+</section>
+
+<section class="page-section" data-page="browse" id="page-browse" hidden>
+  <div class="list-controls" aria-label="Filter and sort">
+    <input type="search" id="searchInput" placeholder="Search title or artist">
+    <div class="type-filter" role="group" aria-label="Filter by type">
+      <button type="button" class="filter-btn active" data-filter="all">All</button>
+      <button type="button" class="filter-btn" data-filter="album">Albums</button>
+      <button type="button" class="filter-btn" data-filter="single">Singles</button>
+    </div>
+    <select id="sortSelect" aria-label="Sort by">
+      <option value="rating">Highest rated</option>
+      <option value="title">Title A–Z</option>
+      <option value="recent">Recently added</option>
+    </select>
+  </div>
+  <div class="entries" id="entriesList"></div>
+  <p class="empty-state" id="emptyState" hidden>Nothing here yet. Add the first album or single.</p>
+</section>
+
+<section class="page-section" data-page="add" id="page-add" hidden>
+  <h2 style="margin-bottom:1rem;">Add a rating</h2>
+  <div class="mb-search">
+    <label>Search MusicBrainz<input type="text" id="mbQuery" placeholder="Search by title or artist…" autocomplete="off"></label>
+    <ul class="mb-results" id="mbResults" hidden></ul>
+    <p class="mb-hint">Pick a result to autofill the title, artist, year, and cover below — or just type your own.</p>
+  </div>
+  <form id="addForm">
+    <div class="field-row">
+      <label>Title<input type="text" id="fTitle" required maxlength="120" autocomplete="off"></label>
+      <label>Artist<input type="text" id="fArtist" required maxlength="120" autocomplete="off"></label>
+    </div>
+    <div class="field-row">
+      <fieldset class="type-choice">
+        <legend>Type</legend>
+        <label><input type="radio" name="type" value="album" checked> Album</label>
+        <label><input type="radio" name="type" value="single"> Single</label>
+      </fieldset>
+      <label class="year-field">Year<input type="number" id="fYear" min="1900" max="2100" placeholder="optional"></label>
+    </div>
+    <div class="field-row">
+      <div class="rating-field">
+        <span>Rating</span>
+        <div class="star-input" id="starInput">
+          <input type="radio" id="r5" name="rating" value="5" required><label for="r5" aria-label="5 stars">★</label>
+          <input type="radio" id="r4" name="rating" value="4"><label for="r4" aria-label="4 stars">★</label>
+          <input type="radio" id="r3" name="rating" value="3"><label for="r3" aria-label="3 stars">★</label>
+          <input type="radio" id="r2" name="rating" value="2"><label for="r2" aria-label="2 stars">★</label>
+          <input type="radio" id="r1" name="rating" value="1"><label for="r1" aria-label="1 star">★</label>
+        </div>
+      </div>
+    </div>
+    <label class="cover-field">Cover image (optional)
+      <input type="file" id="fCover" accept="image/*">
+      <img id="coverPreview" alt="" hidden>
+    </label>
+    <label>Note (optional)<textarea id="fNote" maxlength="240" rows="2"></textarea></label>
+    <button type="submit">Add to the record</button>
+  </form>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <p>Ratings and cover images are stored in this browser only — nothing is uploaded anywhere.</p>
+</footer>
+</div>
+
+<script>
+const STORE_KEY='rmm-entries';
+// Point this at wherever you deploy the spinmark-api backend.
+const API_BASE='http://localhost:3001';
+let entries=[];
+let filter='all', query='', sort='rating', pendingCover=null;
+
+function load(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    entries=raw?JSON.parse(raw):seed();
+  }catch(e){entries=seed();}
+}
+function save(){
+  try{localStorage.setItem(STORE_KEY,JSON.stringify(entries));}catch(e){}
+}
+function seed(){
+  return [
+    {id:cryptoId(),title:'In Rainbows',artist:'Radiohead',type:'album',rating:5,year:2007,note:'',cover:null,added:Date.now()-3},
+    {id:cryptoId(),title:'Blinding Lights',artist:'The Weeknd',type:'single',rating:4,year:2019,note:'',cover:null,added:Date.now()-2},
+    {id:cryptoId(),title:'good kid, m.A.A.d city',artist:'Kendrick Lamar',type:'album',rating:5,year:2012,note:'',cover:null,added:Date.now()-1}
+  ];
+}
+function cryptoId(){return Math.random().toString(36).slice(2,10)+Date.now().toString(36);}
+function escapeHTML(s){
+  return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function coverHTML(e){
+  if(e.cover) return `<img class="cover" src="${e.cover}" alt="">`;
+  return `<div class="cover placeholder" aria-hidden="true">♪</div>`;
+}
+
+function resizeImage(file,maxDim,quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        if(w>h&&w>maxDim){h=Math.round(h*maxDim/w);w=maxDim;}
+        else if(h>=w&&h>maxDim){w=Math.round(w*maxDim/h);h=maxDim;}
+        const canvas=document.createElement('canvas');
+        canvas.width=w;canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.onerror=reject;
+      img.src=reader.result;
+    };
+    reader.onerror=reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function computeStats(list){
+  const albums=list.filter(e=>e.type==='album').length;
+  const singles=list.filter(e=>e.type==='single').length;
+  const avg=list.length?(list.reduce((s,e)=>s+e.rating,0)/list.length).toFixed(1):'–';
+  document.getElementById('statTotal').textContent=list.length;
+  document.getElementById('statAlbums').textContent=albums;
+  document.getElementById('statSingles').textContent=singles;
+  document.getElementById('statAvg').textContent=avg;
+}
+
+function getVisible(){
+  let list=entries.filter(e=>{
+    if(filter!=='all'&&e.type!==filter)return false;
+    if(query){
+      const q=query.toLowerCase();
+      if(!e.title.toLowerCase().includes(q)&&!e.artist.toLowerCase().includes(q))return false;
+    }
+    return true;
+  });
+  if(sort==='rating')list.sort((a,b)=>b.rating-a.rating||b.added-a.added);
+  else if(sort==='title')list.sort((a,b)=>a.title.localeCompare(b.title));
+  else if(sort==='recent')list.sort((a,b)=>b.added-a.added);
+  return list;
+}
+
+function miniCard(e){
+  return `<div class="mini-card">${coverHTML(e)}<h3>${escapeHTML(e.title)}</h3><p>${escapeHTML(e.artist)}</p><div class="stars small">${'★'.repeat(e.rating)}${'☆'.repeat(5-e.rating)}</div></div>`;
+}
+
+function renderHome(){
+  const recent=[...entries].sort((a,b)=>b.added-a.added).slice(0,3);
+  const top=[...entries].sort((a,b)=>b.rating-a.rating||b.added-a.added).slice(0,3);
+  document.getElementById('recentGrid').innerHTML=recent.length?recent.map(miniCard).join(''):'<p class="empty-inline">Nothing added yet.</p>';
+  document.getElementById('topGrid').innerHTML=top.length?top.map(miniCard).join(''):'<p class="empty-inline">Nothing rated yet.</p>';
+}
+
+function renderBrowse(){
+  const list=getVisible();
+  const container=document.getElementById('entriesList');
+  const empty=document.getElementById('emptyState');
+  if(!list.length){
+    container.innerHTML='';
+    empty.hidden=false;
+  }else{
+    empty.hidden=true;
+    container.innerHTML=list.map((e,i)=>{
+      const stars='★'.repeat(e.rating)+'☆'.repeat(5-e.rating);
+      const rank=String(i+1).padStart(2,'0');
+      return `<article class="entry" data-id="${e.id}">
+        <span class="rank" aria-hidden="true">${rank}</span>
+        ${coverHTML(e)}
+        <div class="entry-body">
+          <div class="entry-head">
+            <h3>${escapeHTML(e.title)}</h3>
+            <span class="badge">${e.type==='album'?'Album':'Single'}</span>
+          </div>
+          <p class="artist-line">${escapeHTML(e.artist)}${e.year?' · '+e.year:''}</p>
+          <div class="stars" aria-label="${e.rating} out of 5 stars">${stars}</div>
+          ${e.note?`<p class="note">${escapeHTML(e.note)}</p>`:''}
+        </div>
+        <button class="delete-btn" data-id="${e.id}" aria-label="Delete ${escapeHTML(e.title)}">✕</button>
+      </article>`;
+    }).join('');
+  }
+}
+
+function updateStructuredData(){
+  const data={
+    "@context":"https://schema.org",
+    "@type":"ItemList",
+    "name":"Spinmark — Album & Single Ratings",
+    "itemListElement":entries.map((e,i)=>({
+      "@type":"ListItem",
+      "position":i+1,
+      "item":{
+        "@type":e.type==='album'?'MusicAlbum':'MusicRecording',
+        "name":e.title,
+        "byArtist":{"@type":"MusicGroup","name":e.artist},
+        ...(e.year?{"datePublished":String(e.year)}:{}),
+        "review":{
+          "@type":"Review",
+          "reviewRating":{"@type":"Rating","ratingValue":e.rating,"bestRating":5,"worstRating":1},
+          ...(e.note?{"reviewBody":e.note}:{})
+        }
+      }
+    }))
+  };
+  document.getElementById('structuredData').textContent=JSON.stringify(data);
+}
+
+function renderAll(){
+  computeStats(entries);
+  updateStructuredData();
+  renderBrowse();
+  renderHome();
+}
+
+function showPage(name){
+  document.querySelectorAll('.page-section').forEach(s=>{s.hidden=s.dataset.page!==name;});
+  document.querySelectorAll('.site-nav a').forEach(a=>{a.classList.toggle('active',a.dataset.page===name);});
+}
+function currentPage(){
+  const h=(location.hash||'#home').slice(1);
+  return ['home','browse','add'].includes(h)?h:'home';
+}
+window.addEventListener('hashchange',()=>showPage(currentPage()));
+
+let mbDebounce=null;
+document.getElementById('mbQuery').addEventListener('input',ev=>{
+  clearTimeout(mbDebounce);
+  const q=ev.target.value.trim();
+  const results=document.getElementById('mbResults');
+  if(!q){results.hidden=true;results.innerHTML='';return;}
+  mbDebounce=setTimeout(()=>runMbSearch(q),400);
+});
+
+async function runMbSearch(q){
+  const type=document.querySelector('input[name=type]:checked').value;
+  const results=document.getElementById('mbResults');
+  try{
+    const res=await fetch(`${API_BASE}/api/search?q=${encodeURIComponent(q)}&type=${type}`);
+    if(!res.ok)throw new Error('bad response');
+    const data=await res.json();
+    if(!data.results||!data.results.length){
+      results.innerHTML='<li>No matches found</li>';
+      results.hidden=false;
+      return;
+    }
+    results.innerHTML=data.results.map(r=>`<li data-rg="${r.releaseGroupId||''}" data-title="${escapeHTML(r.title)}" data-artist="${escapeHTML(r.artist)}" data-year="${r.year||''}">${escapeHTML(r.title)} <span class="mbr-artist">— ${escapeHTML(r.artist)}${r.year?' ('+r.year+')':''}</span></li>`).join('');
+    results.hidden=false;
+  }catch(e){
+    results.innerHTML="<li>Couldn't reach the music database — is your API running?</li>";
+    results.hidden=false;
+  }
+}
+
+document.getElementById('mbResults').addEventListener('click',ev=>{
+  const li=ev.target.closest('li[data-title]');
+  if(!li)return;
+  document.getElementById('fTitle').value=li.dataset.title;
+  document.getElementById('fArtist').value=li.dataset.artist;
+  if(li.dataset.year)document.getElementById('fYear').value=li.dataset.year;
+  const rg=li.dataset.rg;
+  const preview=document.getElementById('coverPreview');
+  if(rg){
+    pendingCover=`${API_BASE}/api/cover/${rg}`;
+    preview.src=pendingCover;
+    preview.hidden=false;
+    preview.onerror=()=>{preview.hidden=true;pendingCover=null;};
+  }
+  document.getElementById('mbResults').hidden=true;
+  document.getElementById('mbQuery').value='';
+});
+
+document.getElementById('fCover').addEventListener('change',async ev=>{
+  const file=ev.target.files[0];
+  if(!file)return;
+  try{
+    pendingCover=await resizeImage(file,300,0.82);
+    const preview=document.getElementById('coverPreview');
+    preview.src=pendingCover;
+    preview.hidden=false;
+  }catch(e){}
+});
+
+document.getElementById('addForm').addEventListener('submit',ev=>{
+  ev.preventDefault();
+  const title=document.getElementById('fTitle').value.trim();
+  const artist=document.getElementById('fArtist').value.trim();
+  const type=document.querySelector('input[name=type]:checked').value;
+  const yearVal=document.getElementById('fYear').value;
+  const ratingInput=document.querySelector('input[name=rating]:checked');
+  const note=document.getElementById('fNote').value.trim();
+  if(!title||!artist||!ratingInput)return;
+  entries.push({
+    id:cryptoId(),title,artist,type,
+    rating:parseInt(ratingInput.value,10),
+    year:yearVal?parseInt(yearVal,10):null,
+    note,cover:pendingCover,added:Date.now()
+  });
+  save();
+  ev.target.reset();
+  document.querySelector('input[name=type][value=album]').checked=true;
+  pendingCover=null;
+  const preview=document.getElementById('coverPreview');
+  preview.hidden=true;
+  preview.removeAttribute('src');
+  renderAll();
+  location.hash='#browse';
+});
+
+document.getElementById('entriesList').addEventListener('click',ev=>{
+  const btn=ev.target.closest('.delete-btn');
+  if(!btn)return;
+  entries=entries.filter(e=>e.id!==btn.dataset.id);
+  save();
+  renderAll();
+});
+
+document.getElementById('searchInput').addEventListener('input',ev=>{query=ev.target.value;renderBrowse();});
+document.getElementById('sortSelect').addEventListener('change',ev=>{sort=ev.target.value;renderBrowse();});
+document.querySelectorAll('.filter-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    filter=btn.dataset.filter;
+    renderBrowse();
+  });
+});
+
+load();
+renderAll();
+showPage(currentPage());
+</script>
+</body>
+</html>
